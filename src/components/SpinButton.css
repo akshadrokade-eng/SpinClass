@@ -1,0 +1,60 @@
+.spin-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 40px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  background: transparent;
+  color: #fff;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, opacity 0.2s;
+}
+
+.spin-button:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.spin-button:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+.spin-button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+.spin-button-active {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.spin-button-text {
+  text-transform: uppercase;
+}
+
+.spin-button-icon {
+  opacity: 0.6;
+}
+
+.spin-button-spinning {
+  animation: spinIconRotate 0.8s linear infinite;
+}
+
+@keyframes spinIconRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .spin-button {
+    padding: 14px 32px;
+    font-size: 15px;
+    letter-spacing: 2px;
+  }
+}

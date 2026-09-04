@@ -1,0 +1,44 @@
+.round-complete {
+  text-align: center;
+  margin-top: 12px;
+}
+
+.round-complete-text {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+
+.round-complete-sub {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 16px;
+}
+
+.round-complete-btn {
+  padding: 12px 28px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  background: transparent;
+  color: #fff;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.round-complete-btn:hover {
+  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.round-complete-btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}

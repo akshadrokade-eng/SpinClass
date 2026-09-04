@@ -1,0 +1,76 @@
+.csv-upload-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.csv-upload-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 60px 40px;
+  border: 1.5px dashed rgba(255, 255, 255, 0.25);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  text-align: center;
+}
+
+.csv-upload-zone:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.csv-upload-zone:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.csv-upload-icon {
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 16px;
+}
+
+.csv-upload-title {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.csv-upload-hint {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 12px;
+}
+
+.csv-upload-formats {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.3);
+  letter-spacing: 0.5px;
+}
+
+.csv-upload-error {
+  margin-top: 16px;
+  padding: 12px 20px;
+  border: 1px solid rgba(255, 80, 80, 0.4);
+  border-radius: 8px;
+  background: rgba(255, 80, 80, 0.08);
+  color: #ff6b6b;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 13px;
+  text-align: center;
+}
+
+.csv-upload-input {
+  display: none;
+}
