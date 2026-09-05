@@ -98,6 +98,18 @@
   }
 }
 
+
+
+.credit {
+  margin-top: auto;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.3);
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* f41f447 (Add Developed by Fidsen footer) */
 @media (max-width: 480px) {
   .main-content {
     padding: 64px 16px 20px;
