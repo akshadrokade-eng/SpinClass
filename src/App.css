@@ -109,7 +109,6 @@
   white-space: nowrap;
 }
 
-/* f41f447 (Add Developed by Fidsen footer) */
 @media (max-width: 480px) {
   .main-content {
     padding: 64px 16px 20px;

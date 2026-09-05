@@ -220,9 +220,8 @@ function App() {
                 </div>
               </div>
             )}
-/* f41f447 (Add Developed by Fidsen footer) */
+            {/* f41f447 (Add Developed by Fidsen footer) */}
             <div className="credit">Developed by Fidsen</div>
-/* f41f447 (Add Developed by Fidsen footer) */
           </>
         )}
       </main>
