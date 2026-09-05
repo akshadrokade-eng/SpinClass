@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from "react";
 import type { Student } from "./types";
 import { parseCsv, CsvParseError } from "./utils/csvParser";
-import { saveSession, loadSession, clearSession } from "./utils/storage";
+import { saveSession, clearSession } from "./utils/storage";
 import { useKeyboard } from "./hooks/useKeyboard";
 import { Header } from "./components/Header";
 import { StatsBar } from "./components/StatsBar";
@@ -30,37 +30,6 @@ function App() {
   const slotRef = useRef<SlotMachineHandle>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const currentWinnerRef = useRef<Student | null>(null);
-
-  // Session management state
-  const [savedSession, setSavedSession] = useState<{
-    students: Student[];
-    askedIds: number[];
-    noRepeatMode: boolean;
-  } | null>(null);
-
-  // Load session from localStorage on demand (not automatically)
-  const loadSavedSession = useCallback(() => {
-    const session = loadSession();
-    if (session) {
-      setStudents(session.students);
-      setAskedIds(session.askedIds);
-      setNoRepeatMode(session.noRepeatMode);
-      setSavedSession(session);
-    }
-  }, []);
-
-  const saveCurrentSession = useCallback(() => {
-    saveSession(students, askedIds, noRepeatMode);
-    const session = loadSession();
-    if (session) {
-      setSavedSession(session);
-    }
-  }, [students, askedIds, noRepeatMode]);
-
-  const clearSavedSession = useCallback(() => {
-    clearSession();
-    setSavedSession(null);
-  }, []);
 
   const handleCsvUpload = useCallback(
     (content: string) => {
@@ -188,10 +157,6 @@ function App() {
         onMenuToggle={() => setDrawerOpen((p) => !p)}
         onFullscreen={handleFullscreen}
         onReset={handleReset}
-        onSaveSession={saveCurrentSession}
-        onLoadSession={loadSavedSession}
-        onClearSession={clearSavedSession}
-        hasSavedSession={savedSession !== null}
       />
 
       {confirmReset && (
