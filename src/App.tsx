@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useRef } from "react";
 import type { Student } from "./types";
 import { parseCsv, CsvParseError } from "./utils/csvParser";
 import { saveSession, loadSession, clearSession } from "./utils/storage";
@@ -14,18 +14,11 @@ import { CsvUpload } from "./components/CsvUpload";
 import { RoundComplete } from "./components/RoundComplete";
 import "./App.css";
 
-const savedSession = loadSession();
-
 function App() {
-  const [students, setStudents] = useState<Student[]>(
-    savedSession?.students ?? [],
-  );
-  const [askedIds, setAskedIds] = useState<number[]>(
-    savedSession?.askedIds ?? [],
-  );
-  const [noRepeatMode, setNoRepeatMode] = useState(
-    savedSession?.noRepeatMode ?? true,
-  );
+  // Start with fresh state - no automatic session restoration
+  const [students, setStudents] = useState<Student[]>([]);
+  const [askedIds, setAskedIds] = useState<number[]>([]);
+  const [noRepeatMode, setNoRepeatMode] = useState<boolean>(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [csvError, setCsvError] = useState<string | null>(null);
   const [roundComplete, setRoundComplete] = useState(false);
@@ -38,11 +31,36 @@ function App() {
   const containerRef = useRef<HTMLDivElement>(null);
   const currentWinnerRef = useRef<Student | null>(null);
 
-  useEffect(() => {
-    if (students.length > 0) {
-      saveSession(students, askedIds, noRepeatMode);
+  // Session management state
+  const [savedSession, setSavedSession] = useState<{
+    students: Student[];
+    askedIds: number[];
+    noRepeatMode: boolean;
+  } | null>(null);
+
+  // Load session from localStorage on demand (not automatically)
+  const loadSavedSession = useCallback(() => {
+    const session = loadSession();
+    if (session) {
+      setStudents(session.students);
+      setAskedIds(session.askedIds);
+      setNoRepeatMode(session.noRepeatMode);
+      setSavedSession(session);
+    }
+  }, []);
+
+  const saveCurrentSession = useCallback(() => {
+    saveSession(students, askedIds, noRepeatMode);
+    const session = loadSession();
+    if (session) {
+      setSavedSession(session);
     }
   }, [students, askedIds, noRepeatMode]);
+
+  const clearSavedSession = useCallback(() => {
+    clearSession();
+    setSavedSession(null);
+  }, []);
 
   const handleCsvUpload = useCallback(
     (content: string) => {
@@ -56,9 +74,9 @@ function App() {
         setRevealedStudent(null);
         currentWinnerRef.current = null;
         slotRef.current?.cancel();
-        setCsvError(null);
         clearSession();
         saveSession(parsed, [], true);
+        setCsvError(null);
       } catch (err) {
         if (err instanceof CsvParseError) {
           setCsvError(err.message);
@@ -170,6 +188,10 @@ function App() {
         onMenuToggle={() => setDrawerOpen((p) => !p)}
         onFullscreen={handleFullscreen}
         onReset={handleReset}
+        onSaveSession={saveCurrentSession}
+        onLoadSession={loadSavedSession}
+        onClearSession={clearSavedSession}
+        hasSavedSession={savedSession !== null}
       />
 
       {confirmReset && (
