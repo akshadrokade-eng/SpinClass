@@ -46,10 +46,3 @@ SpinClass supports common classroom list formats:
 - XLSX
 - XLS
 
-Supported student-list structures include:
-
-```text
-Student Name
-Akshad Rokade
-Rugved Nimje
-Yugal Shende
