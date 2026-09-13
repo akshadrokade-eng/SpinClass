@@ -1,46 +1,55 @@
+# SPINCLASS
 
-# SpinClass
+> A minimalist classroom randomizer for fair, fast, and engaging student selection.
 
-A classroom random student selector with a slot-machine-style spinning interface.
+SpinClass is a web-based classroom utility that helps teachers randomly select students without repeating anyone during the current session.
 
-## Live Demo
+Upload your student list, spin the slot machine, and let SpinClass decide who goes next.
 
-https://spinclass.pages.dev
+It also includes **Team & Topic** mode, allowing teachers to randomly create teams and assign topics with a single spin.
 
-## Features
+---
 
-- Import students using CSV
-- Random student selection
-- No-repeat selection
-- Slot-machine-style spinner
-- Student statistics
-- Student list
-- Session reset
-- Keyboard controls
-- Responsive interface
+## ✦ Features
 
-## Screenshots
+### Student Randomizer
 
-### Main Interface
+- Upload a student list from a file
+- Randomly select students using a slot-machine style animation
+- Prevent previously selected students from being selected again
+- Clearly display the selected student
+- Track completed students
+- View completed students from the student drawer
+- Reset the session without re-uploading the student list
 
-![SpinClass](screenshots/home.png)
+### Team & Topic
 
-### Student Selection
+- Randomly select multiple students as a team
+- Choose the required team size
+- Randomly assign one topic with the team
+- Generate the team and topic using a single **SPIN**
+- Prevent students from being selected more than once
+- Prevent topics from being assigned more than once
+- Track completed students
+- View completed students from the student drawer
+- Block selection when there are not enough students remaining
+- Reset the entire session with the existing reset button
 
-![Selected Student](screenshots/selected-student.png)
+### File Import
 
-## Tech Stack
+SpinClass supports common classroom list formats:
 
-- React
-- TypeScript
-- Vite
-- CSS
-- Cloudflare Pages
+- CSV
+- TSV
+- TXT
+- JSON
+- XLSX
+- XLS
 
-## Getting Started
+Supported student-list structures include:
 
-Clone the repository:
-
-```bash
-git clone https://github.com/akshadrokade-eng/SpinClass.git
-cd SpinClass
+```text
+Student Name
+Akshad Rokade
+Rugved Nimje
+Yugal Shende
