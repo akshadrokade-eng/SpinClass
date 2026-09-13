@@ -2,8 +2,8 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #0a0a0a;
-  color: #fff;
+  background: var(--bg);
+  color: var(--text);
   overflow-x: hidden;
 }
 
@@ -16,6 +16,11 @@
   padding: 72px 32px 28px;
   min-height: 100vh;
   gap: 0;
+}
+
+.main-content-top {
+  justify-content: flex-start;
+  overflow-y: auto;
 }
 
 .slot-area {
@@ -86,6 +91,10 @@
     padding: 72px 20px 24px;
   }
 
+  .main-content-top {
+    padding: 56px 20px 24px;
+  }
+
   .controls-row {
     flex-direction: column;
     gap: 20px;
@@ -112,5 +121,9 @@
 @media (max-width: 480px) {
   .main-content {
     padding: 64px 16px 20px;
+  }
+
+  .main-content-top {
+    padding: 56px 16px 20px;
   }
 }

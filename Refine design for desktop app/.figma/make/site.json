@@ -1,0 +1,10 @@
+{
+  "description": "Streamlines team and topic selection with a clean, aligned interface that enhances usability and clarity for efficient project management.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

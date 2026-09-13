@@ -6,6 +6,16 @@
   box-sizing: border-box;
 }
 
+:root {
+  --bg: #0c0c0c;
+  --bg-surface: #141414;
+  --border: #262626;
+  --border-strong: #3d3d3d;
+  --text: #e6e4de;
+  --text-dim: #656560;
+  --text-muted: #2e2e2e;
+}
+
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -14,8 +24,8 @@ html {
 
 body {
   font-family: "Courier New", Courier, monospace;
-  background: #0a0a0a;
-  color: #fff;
+  background: var(--bg);
+  color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;
 }

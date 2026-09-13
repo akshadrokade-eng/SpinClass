@@ -6,8 +6,16 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 32px;
+  height: 48px;
+  padding: 0 32px;
+  border-bottom: 1px solid var(--border);
   z-index: 100;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 24px;
 }
 
 .header-logo {
@@ -15,35 +23,104 @@
   font-size: 14px;
   font-weight: 700;
   letter-spacing: 3px;
-  color: #fff;
+  color: var(--text);
   text-transform: uppercase;
+}
+
+.header-nav {
+  display: flex;
+  gap: 4px;
+}
+
+.header-nav-btn {
+  padding: 6px 14px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-dim);
+  font-family: "Courier New", Courier, monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.header-nav-btn:hover {
+  color: var(--text);
+}
+
+.header-nav-btn.active {
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+.header-nav-btn:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
 }
 
 .header-actions {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
 .header-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
   background: transparent;
-  color: #fff;
+  color: var(--text-dim);
   cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
+  transition: color 0.15s, border-color 0.15s;
 }
 
 .header-btn:hover {
-  border-color: rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  border-color: var(--border-strong);
 }
 
 .header-btn:focus-visible {
-  outline: 2px solid #fff;
+  outline: 2px solid var(--text);
   outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 0 20px;
+  }
+
+  .header-left {
+    gap: 12px;
+  }
+
+  .header-nav {
+    gap: 2px;
+  }
+
+  .header-nav-btn {
+    padding: 5px 10px;
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-logo {
+    font-size: 12px;
+    letter-spacing: 2px;
+  }
+
+  .header-nav-btn {
+    padding: 4px 8px;
+    font-size: 8px;
+    letter-spacing: 1px;
+  }
+
+  .header-btn {
+    width: 28px;
+    height: 28px;
+  }
 }

@@ -8,8 +8,16 @@ interface SpinParams {
   onComplete: () => void;
 }
 
-function quintic(t: number): number {
-  return t * t * t * (t * (6 * t - 15) + 10);
+function slotEasing(t: number): number {
+  if (t < 0.15) {
+    return 4 * t * t * t;
+  }
+  if (t < 0.6) {
+    const p = (t - 0.15) / 0.45;
+    return 0.135 + p * 0.73;
+  }
+  const p = (t - 0.6) / 0.4;
+  return 0.865 + (1 - (1 - p) * (1 - p)) * 0.135;
 }
 
 export function useSlotAnimation() {
@@ -42,30 +50,35 @@ export function useSlotAnimation() {
 
       cancelledRef.current = false;
 
-      const extraSpins = 2 + Math.floor(Math.random() * 2);
+      const extraSpins = 3 + Math.floor(Math.random() * 2);
       const totalDistance = extraSpins * totalRows + targetStripIndex;
-      const totalDuration = 3500 + Math.random() * 500;
+      const totalDuration = 3200 + Math.random() * 600;
 
       trackEl.style.willChange = "transform";
 
       const startTime = performance.now();
+      let lastProgress = 0;
 
       const animate = (now: number) => {
         if (cancelledRef.current) return;
 
         const elapsed = now - startTime;
         const rawProgress = Math.min(elapsed / totalDuration, 1);
-        const easedProgress = quintic(rawProgress);
+        const easedProgress = slotEasing(rawProgress);
 
         const currentRow = easedProgress * totalDistance;
         const currentOffset = -(currentRow * rowHeight);
         trackEl.style.transform = `translate3d(0, ${currentOffset}px, 0)`;
 
-        const t1 = rawProgress * (1 - rawProgress);
-        const blurAmount = t1 * t1 * 40;
-        trackEl.style.filter = blurAmount > 0.2
-          ? `blur(${blurAmount.toFixed(1)}px)`
-          : "none";
+        const velocity = Math.abs(easedProgress - lastProgress);
+        lastProgress = easedProgress;
+
+        const blurAmount = velocity * 350;
+        if (blurAmount > 0.3 && rawProgress < 0.95) {
+          trackEl.style.filter = `blur(${Math.min(blurAmount, 6).toFixed(1)}px)`;
+        } else {
+          trackEl.style.filter = "none";
+        }
 
         if (rawProgress < 1) {
           animFrameRef.current = requestAnimationFrame(animate);
