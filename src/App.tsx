@@ -1,6 +1,5 @@
 import { useState, useCallback, useRef } from "react";
 import type { Student } from "./types";
-import { parseCsv, CsvParseError } from "./utils/csvParser";
 import { saveSession, clearSession } from "./utils/storage";
 import { useKeyboard } from "./hooks/useKeyboard";
 import { Header } from "./components/Header";
@@ -39,27 +38,22 @@ function App() {
   const currentWinnerRef = useRef<Student | null>(null);
 
   const handleCsvUpload = useCallback(
-    (content: string) => {
-      try {
-        const parsed = parseCsv(content);
-        setStudents(parsed);
-        setAskedIds([]);
-        setNoRepeatMode(true);
-        setRoundComplete(false);
-        setAnimPhase("idle");
-        setRevealedStudent(null);
-        currentWinnerRef.current = null;
-        slotRef.current?.cancel();
-        clearSession();
-        saveSession(parsed, [], true);
-        setCsvError(null);
-      } catch (err) {
-        if (err instanceof CsvParseError) {
-          setCsvError(err.message);
-        } else {
-          setCsvError("Failed to parse CSV file.");
-        }
+    (parsed: Student[]) => {
+      if (parsed.length === 0) {
+        setCsvError("No students were found in this file.");
+        return;
       }
+      setStudents(parsed);
+      setAskedIds([]);
+      setNoRepeatMode(true);
+      setRoundComplete(false);
+      setAnimPhase("idle");
+      setRevealedStudent(null);
+      currentWinnerRef.current = null;
+      slotRef.current?.cancel();
+      clearSession();
+      saveSession(parsed, [], true);
+      setCsvError(null);
     },
     [],
   );

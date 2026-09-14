@@ -1,31 +1,58 @@
 import { useRef } from "react";
 import { Upload } from "lucide-react";
+import { parseFile } from "../utils/csvParser";
+import type { Student } from "../types";
 import "../components/CsvUpload.css";
 
 interface CsvUploadProps {
-  onUpload: (content: string) => void;
+  onUpload: (students: Student[]) => void;
   error: string | null;
 }
 
 export function CsvUpload({ onUpload, error }: CsvUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const processFile = (file: File) => {
+    const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
+    const binaryExts = ["xlsx", "xls"];
+
+    if (binaryExts.includes(ext)) {
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          const data = new Uint8Array(evt.target?.result as ArrayBuffer);
+          let binary = "";
+          for (let i = 0; i < data.byteLength; i++) {
+            binary += String.fromCharCode(data[i]);
+          }
+          const base64 = btoa(binary);
+          const students = parseFile(base64, file.name, true);
+          onUpload(students);
+        } catch {
+          onUpload([]);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    } else {
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          const text = evt.target?.result;
+          if (typeof text !== "string") return;
+          const students = parseFile(text, file.name);
+          onUpload(students);
+        } catch {
+          onUpload([]);
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    if (!file.name.endsWith(".csv") && file.type !== "text/csv") {
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (evt) => {
-      const text = evt.target?.result;
-      if (typeof text === "string") {
-        onUpload(text);
-      }
-    };
-    reader.readAsText(file);
+    processFile(file);
     e.target.value = "";
   };
 
@@ -33,15 +60,7 @@ export function CsvUpload({ onUpload, error }: CsvUploadProps) {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
     if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (evt) => {
-      const text = evt.target?.result;
-      if (typeof text === "string") {
-        onUpload(text);
-      }
-    };
-    reader.readAsText(file);
+    processFile(file);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -63,15 +82,15 @@ export function CsvUpload({ onUpload, error }: CsvUploadProps) {
             inputRef.current?.click();
           }
         }}
-        aria-label="Upload CSV file"
+        aria-label="Upload student file"
       >
         <Upload size={32} className="csv-upload-icon" />
-        <div className="csv-upload-title">Upload Student CSV</div>
+        <div className="csv-upload-title">Upload Student File</div>
         <div className="csv-upload-hint">
-          Drop a .csv file here or click to browse
+          Drop a file here or click to browse
         </div>
         <div className="csv-upload-formats">
-          Supports: Name-only, Roll+Name, Headerless CSV
+          CSV, TSV, TXT, JSON, XLSX, XLS
         </div>
       </div>
       {error && (
@@ -82,10 +101,10 @@ export function CsvUpload({ onUpload, error }: CsvUploadProps) {
       <input
         ref={inputRef}
         type="file"
-        accept=".csv,text/csv"
+        accept=".csv,.tsv,.txt,.json,.xlsx,.xls"
         onChange={handleFileChange}
         className="csv-upload-input"
-        aria-label="CSV file input"
+        aria-label="Student file input"
       />
     </div>
   );

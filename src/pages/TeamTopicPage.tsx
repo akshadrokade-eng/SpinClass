@@ -341,7 +341,7 @@ export function TeamTopicPage({ drawerOpen, onDrawerClose, onPageReset, resetCal
               >
                 <Upload size={20} className="tt-upload-icon" />
                 <div className="tt-upload-text">UPLOAD TEAM MEMBERS</div>
-                <div className="tt-upload-hint">CSV, TSV, TXT, JSON, XLSX</div>
+                <div className="tt-upload-hint">CSV, TSV, TXT, JSON, XLSX, XLS</div>
                 <input
                   type="file"
                   accept=".csv,.tsv,.txt,.json,.xlsx,.xls"
@@ -399,7 +399,7 @@ export function TeamTopicPage({ drawerOpen, onDrawerClose, onPageReset, resetCal
               >
                 <Upload size={18} className="tt-upload-icon" />
                 <div className="tt-upload-text">UPLOAD TOPIC</div>
-                <div className="tt-upload-hint">CSV, TSV, TXT, JSON, XLSX</div>
+                <div className="tt-upload-hint">CSV, TSV, TXT, JSON, XLSX, XLS</div>
                 <input
                   type="file"
                   accept=".csv,.tsv,.txt,.json,.xlsx,.xls"
