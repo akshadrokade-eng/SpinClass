@@ -244,7 +244,7 @@ function App() {
                     </div>
                   </div>
                 )}
-                <div className="credit">Developed by Fidsen</div>
+
               </>
             )}
           </>
