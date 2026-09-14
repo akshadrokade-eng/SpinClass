@@ -44,12 +44,12 @@
 }
 
 .spin-button-spinning {
-  animation: spinIconRotate 0.8s linear infinite;
+  animation: spin-icon 0.6s linear infinite;
 }
 
-@keyframes spinIconRotate {
+@keyframes spin-icon {
   from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  to { transform: rotate(-360deg); }
 }
 
 @media (max-width: 768px) {

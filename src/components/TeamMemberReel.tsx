@@ -1,5 +1,4 @@
-import { useRef, useEffect, useImperativeHandle, forwardRef, useState } from "react";
-import { useSlotAnimation } from "../hooks/useSlotAnimation";
+import { useRef, useEffect, useImperativeHandle, forwardRef, useState, useCallback } from "react";
 import "../components/TeamMemberReel.css";
 
 export interface TeamMemberReelHandle {
@@ -13,158 +12,124 @@ interface TeamMemberReelProps {
   onSpinComplete: () => void;
 }
 
-const REEL_PADDING = 200;
+function mod(n: number, m: number): number {
+  return ((n % m) + m) % m;
+}
 
 export const TeamMemberReel = forwardRef<TeamMemberReelHandle, TeamMemberReelProps>(
   function TeamMemberReel({ studentNames, teamSize, onSpinComplete }, ref) {
-    const trackRef = useRef<HTMLDivElement>(null);
-    const clipRef = useRef<HTMLDivElement>(null);
-    const [isIdle, setIsIdle] = useState(true);
-    const spinningRef = useRef(false);
-    const lastNamesRef = useRef<string[]>([]);
+    const [activeIndex, setActiveIndex] = useState(0);
+    const [isSpinning, setIsSpinning] = useState(false);
+    const [finalTeam, setFinalTeam] = useState<string[]>([]);
+    const spinTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const { spin: doSpin, cancel } = useSlotAnimation();
-
-    const measureRowHeight = (): number => {
-      const track = trackRef.current;
-      if (!track || track.children.length === 0) return 44;
-      const firstRow = track.children[0] as HTMLElement;
-      return firstRow.offsetHeight || 44;
-    };
-
-    const measureClipHeight = (): number => {
-      const clip = clipRef.current;
-      return clip ? clip.clientHeight : 240;
-    };
+    const cleanup = useCallback(() => {
+      if (spinTimerRef.current !== null) {
+        clearTimeout(spinTimerRef.current);
+        spinTimerRef.current = null;
+      }
+    }, []);
 
     useImperativeHandle(ref, () => ({
       spin(names: string[], targetIndices: number[]) {
-        const track = trackRef.current;
-        if (!track || names.length === 0 || targetIndices.length === 0) return;
+        if (names.length === 0 || targetIndices.length === 0) return;
 
-        spinningRef.current = true;
-        setIsIdle(false);
+        cleanup();
 
-        const reelNames: string[] = [];
-        for (let i = 0; i < REEL_PADDING; i++) {
-          reelNames.push(names[i % names.length]);
-        }
-        for (const idx of targetIndices) {
-          reelNames.push(names[idx % names.length]);
-        }
+        const team = targetIndices.map((i) => names[i % names.length]);
 
-        track.innerHTML = "";
-        track.style.transition = "none";
-        track.style.transform = "translate3d(0, 0, 0)";
-        track.style.filter = "none";
+        setIsSpinning(true);
+        setFinalTeam([]);
+        setActiveIndex(0);
 
-        for (let i = 0; i < reelNames.length; i++) {
-          const row = document.createElement("div");
-          row.className = "tm-slot-row";
-          row.textContent = reelNames[i];
-          track.appendChild(row);
-        }
+        let tick = 0;
+        const totalTicks = 30;
+        let delay = 20;
 
-        const rowHeight = measureRowHeight();
-        const clipHeight = measureClipHeight();
-        const targetRowCenter = REEL_PADDING * rowHeight + rowHeight / 2;
-        const clipCenter = clipHeight / 2;
-        const finalOffset = clipCenter - targetRowCenter;
+        const cycle = () => {
+          setActiveIndex((prev) => mod(prev + 1, names.length));
+          tick++;
 
-        requestAnimationFrame(() => {
-          doSpin(track, {
-            rowHeight,
-            targetOffset: finalOffset,
-            totalRows: reelNames.length,
-            targetStripIndex: REEL_PADDING,
-            onComplete: () => {
-              track.style.transition = "none";
-              track.style.transform = "translate3d(0, 0, 0)";
-              track.style.filter = "none";
+          if (tick >= totalTicks) {
+            const anchorIndex = targetIndices[0] % names.length;
+            setActiveIndex(anchorIndex);
+            setFinalTeam(team);
+            setIsSpinning(false);
+            onSpinComplete();
+            return;
+          }
 
-              track.innerHTML = "";
-              const displayCount = Math.min(teamSize, targetIndices.length);
-              for (let i = 0; i < displayCount; i++) {
-                const row = document.createElement("div");
-                row.className = "tm-slot-row tm-slot-row-center";
-                row.textContent = reelNames[REEL_PADDING + i];
-                track.appendChild(row);
-              }
+          if (tick < 22) {
+            delay = 20;
+          } else {
+            delay = 20 + (tick - 22) * 6;
+          }
 
-              const newTrackHeight = displayCount * rowHeight;
-              const newClipCenter = clipHeight / 2;
-              const newTargetCenter = newTrackHeight / 2;
-              track.style.transform = `translate3d(0, ${newClipCenter - newTargetCenter}px, 0)`;
+          spinTimerRef.current = setTimeout(cycle, delay);
+        };
 
-              spinningRef.current = false;
-              setIsIdle(true);
-              onSpinComplete();
-            },
-          });
-        });
+        spinTimerRef.current = setTimeout(cycle, delay);
       },
       cancel() {
-        spinningRef.current = false;
-        setIsIdle(true);
-        cancel();
+        cleanup();
+        setIsSpinning(false);
+        setFinalTeam([]);
       },
     }));
 
+    useEffect(() => cleanup, [cleanup]);
+
     useEffect(() => {
       return () => {
-        spinningRef.current = false;
-        cancel();
+        cleanup();
       };
-    }, [cancel]);
+    }, [cleanup]);
 
-    useEffect(() => {
-      if (studentNames.length === 0) return;
-      if (spinningRef.current) return;
-      const track = trackRef.current;
-      if (!track) return;
+    const displayNames: string[] = [];
 
-      const namesKey = studentNames.join("\0");
-      if (namesKey === lastNamesRef.current.join("\0")) return;
-      lastNamesRef.current = studentNames;
-
-      track.innerHTML = "";
-      track.style.transition = "none";
-      track.style.transform = "translate3d(0, 0, 0)";
-      track.style.filter = "none";
-
-      const displayCount = Math.min(teamSize, studentNames.length);
-      const clipHeight = measureClipHeight();
-      const rowHeight = measureRowHeight();
-      const totalTrackHeight = displayCount * rowHeight;
-      const clipCenter = clipHeight / 2;
-      const trackCenter = totalTrackHeight / 2;
-
-      for (let i = 0; i < displayCount; i++) {
-        const row = document.createElement("div");
-        row.className = "tm-slot-row tm-slot-row-center";
-        row.textContent = studentNames[i];
-        track.appendChild(row);
+    if (isSpinning) {
+      for (let offset = -2; offset <= 2; offset++) {
+        const idx = mod(activeIndex + offset, studentNames.length);
+        displayNames.push(studentNames[idx]);
       }
-
-      track.style.transform = `translate3d(0, ${clipCenter - trackCenter}px, 0)`;
-    }, [studentNames, teamSize]);
+    } else if (finalTeam.length > 0) {
+      for (let i = 0; i < Math.min(teamSize, finalTeam.length); i++) {
+        displayNames.push(finalTeam[i]);
+      }
+    } else {
+      for (let i = 0; i < Math.min(teamSize, studentNames.length); i++) {
+        displayNames.push(studentNames[i]);
+      }
+    }
 
     return (
       <div className="tm-reel-container">
         <div className="tm-reel-wrapper">
           <div
-            className={`tm-reel-indicator-top ${isIdle && studentNames.length > 0 ? "indicator-active" : ""}`}
+            className={`tm-reel-indicator-top ${!isSpinning && studentNames.length > 0 ? "indicator-active" : ""}`}
             aria-hidden="true"
           >
             <svg width="12" height="8" viewBox="0 0 12 8" fill="none" stroke="currentColor" strokeWidth="1.5">
               <polyline points="1,7 6,2 11,7" />
             </svg>
           </div>
-          <div className="tm-reel-clip" ref={clipRef}>
-            <div className="tm-reel-track" ref={trackRef} />
+          <div className="tm-reel-clip">
+            <div className="tm-reel-track">
+              {displayNames.map((name, i) => {
+                const isCenter = isSpinning ? i === 2 : true;
+                return (
+                  <div
+                    key={`${isSpinning ? "s" : "i"}-${i}-${name}`}
+                    className={`tm-slot-row ${isCenter ? "tm-slot-row-center" : ""}`}
+                  >
+                    {name}
+                  </div>
+                );
+              })}
+            </div>
           </div>
           <div
-            className={`tm-reel-indicator-bottom ${isIdle && studentNames.length > 0 ? "indicator-active" : ""}`}
+            className={`tm-reel-indicator-bottom ${!isSpinning && studentNames.length > 0 ? "indicator-active" : ""}`}
             aria-hidden="true"
           >
             <svg width="12" height="8" viewBox="0 0 12 8" fill="none" stroke="currentColor" strokeWidth="1.5">

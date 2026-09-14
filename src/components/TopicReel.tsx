@@ -1,5 +1,4 @@
-import { useRef, useEffect, useImperativeHandle, forwardRef, useState } from "react";
-import { useSlotAnimation } from "../hooks/useSlotAnimation";
+import { useRef, useEffect, useImperativeHandle, forwardRef, useState, useCallback } from "react";
 import "../components/TopicReel.css";
 
 export interface TopicReelHandle {
@@ -12,137 +11,105 @@ interface TopicReelProps {
   onSpinComplete: () => void;
 }
 
-const REEL_PADDING = 200;
+function mod(n: number, m: number): number {
+  return ((n % m) + m) % m;
+}
 
 export const TopicReel = forwardRef<TopicReelHandle, TopicReelProps>(
   function TopicReel({ topics, onSpinComplete }, ref) {
-    const trackRef = useRef<HTMLDivElement>(null);
-    const clipRef = useRef<HTMLDivElement>(null);
-    const [isIdle, setIsIdle] = useState(true);
-    const spinningRef = useRef(false);
-    const lastTopicsRef = useRef<string[]>([]);
+    const [activeIndex, setActiveIndex] = useState(0);
+    const [isSpinning, setIsSpinning] = useState(false);
+    const [finalTopic, setFinalTopic] = useState("");
+    const spinTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const { spin: doSpin, cancel } = useSlotAnimation();
-
-    const measureRowHeight = (): number => {
-      const track = trackRef.current;
-      if (!track || track.children.length === 0) return 44;
-      const firstRow = track.children[0] as HTMLElement;
-      return firstRow.offsetHeight || 44;
-    };
-
-    const measureClipHeight = (): number => {
-      const clip = clipRef.current;
-      return clip ? clip.clientHeight : 44;
-    };
+    const cleanup = useCallback(() => {
+      if (spinTimerRef.current !== null) {
+        clearTimeout(spinTimerRef.current);
+        spinTimerRef.current = null;
+      }
+    }, []);
 
     useImperativeHandle(ref, () => ({
       spin(topicsList: string[], targetIndex: number) {
-        const track = trackRef.current;
-        if (!track || topicsList.length === 0) return;
+        if (topicsList.length === 0) return;
 
-        spinningRef.current = true;
-        setIsIdle(false);
+        cleanup();
 
-        const reelTopics: string[] = [];
-        for (let i = 0; i < REEL_PADDING; i++) {
-          reelTopics.push(topicsList[i % topicsList.length]);
-        }
-        reelTopics.push(topicsList[targetIndex % topicsList.length]);
+        const topic = topicsList[targetIndex % topicsList.length];
 
-        track.innerHTML = "";
-        track.style.transition = "none";
-        track.style.transform = "translate3d(0, 0, 0)";
-        track.style.filter = "none";
+        setIsSpinning(true);
+        setFinalTopic("");
+        setActiveIndex(0);
 
-        for (let i = 0; i < reelTopics.length; i++) {
-          const row = document.createElement("div");
-          row.className = "topic-slot-row";
-          row.textContent = reelTopics[i];
-          track.appendChild(row);
-        }
+        let tick = 0;
+        const totalTicks = 30;
+        let delay = 20;
 
-        const rowHeight = measureRowHeight();
-        const clipHeight = measureClipHeight();
-        const targetRowCenter = REEL_PADDING * rowHeight + rowHeight / 2;
-        const clipCenter = clipHeight / 2;
-        const finalOffset = clipCenter - targetRowCenter;
+        const cycle = () => {
+          setActiveIndex((prev) => mod(prev + 1, topicsList.length));
+          tick++;
 
-        requestAnimationFrame(() => {
-          doSpin(track, {
-            rowHeight,
-            targetOffset: finalOffset,
-            totalRows: reelTopics.length,
-            targetStripIndex: REEL_PADDING,
-            onComplete: () => {
-              track.style.transition = "none";
-              track.style.transform = "translate3d(0, 0, 0)";
-              track.style.filter = "none";
+          if (tick >= totalTicks) {
+            setActiveIndex(targetIndex % topicsList.length);
+            setFinalTopic(topic);
+            setIsSpinning(false);
+            onSpinComplete();
+            return;
+          }
 
-              track.innerHTML = "";
-              const row = document.createElement("div");
-              row.className = "topic-slot-row topic-slot-row-center";
-              row.textContent = reelTopics[REEL_PADDING];
-              track.appendChild(row);
+          if (tick < 22) {
+            delay = 20;
+          } else {
+            delay = 20 + (tick - 22) * 6;
+          }
 
-              spinningRef.current = false;
-              setIsIdle(true);
-              onSpinComplete();
-            },
-          });
-        });
+          spinTimerRef.current = setTimeout(cycle, delay);
+        };
+
+        spinTimerRef.current = setTimeout(cycle, delay);
       },
       cancel() {
-        spinningRef.current = false;
-        setIsIdle(true);
-        cancel();
+        cleanup();
+        setIsSpinning(false);
+        setFinalTopic("");
       },
     }));
 
+    useEffect(() => cleanup, [cleanup]);
+
     useEffect(() => {
       return () => {
-        spinningRef.current = false;
-        cancel();
+        cleanup();
       };
-    }, [cancel]);
+    }, [cleanup]);
 
-    useEffect(() => {
-      if (topics.length === 0) return;
-      if (spinningRef.current) return;
-      const track = trackRef.current;
-      if (!track) return;
-
-      const topicsKey = topics.join("\0");
-      if (topicsKey === lastTopicsRef.current.join("\0")) return;
-      lastTopicsRef.current = topics;
-
-      track.innerHTML = "";
-      track.style.transition = "none";
-      track.style.transform = "translate3d(0, 0, 0)";
-      track.style.filter = "none";
-
-      const row = document.createElement("div");
-      row.className = "topic-slot-row topic-slot-row-center";
-      row.textContent = topics[0];
-      track.appendChild(row);
-    }, [topics]);
+    const displayTopic = isSpinning
+      ? topics[activeIndex % topics.length]
+      : finalTopic || (topics.length > 0 ? topics[0] : "");
 
     return (
       <div className="topic-reel-container">
         <div className="topic-reel-wrapper">
           <div
-            className={`topic-reel-indicator-left ${isIdle && topics.length > 0 ? "indicator-active" : ""}`}
+            className={`topic-reel-indicator-left ${!isSpinning && topics.length > 0 ? "indicator-active" : ""}`}
             aria-hidden="true"
           >
             <svg width="8" height="12" viewBox="0 0 8 12" fill="none" stroke="currentColor" strokeWidth="1.5">
               <polyline points="7,1 2,6 7,11" />
             </svg>
           </div>
-          <div className="topic-reel-clip" ref={clipRef}>
-            <div className="topic-reel-track" ref={trackRef} />
+          <div className="topic-reel-clip">
+            <div className="topic-reel-track">
+              <div
+                key={`${isSpinning ? "s" : "i"}-${displayTopic}`}
+                className="topic-slot-row topic-slot-row-center"
+              >
+                {displayTopic}
+              </div>
+            </div>
           </div>
           <div
-            className={`topic-reel-indicator-right ${isIdle && topics.length > 0 ? "indicator-active" : ""}`}
+            className={`topic-reel-indicator-right ${!isSpinning && topics.length > 0 ? "indicator-active" : ""}`}
             aria-hidden="true"
           >
             <svg width="8" height="12" viewBox="0 0 8 12" fill="none" stroke="currentColor" strokeWidth="1.5">
